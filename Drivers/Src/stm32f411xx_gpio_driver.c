@@ -1,7 +1,6 @@
 /*
  * stm32411xx_gpio_driver.c
  *
- *  Created on: May 8, 2023
  *      Author: arul
  */
 

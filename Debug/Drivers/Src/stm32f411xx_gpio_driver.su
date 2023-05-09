@@ -1,6 +1,0 @@
-../Drivers/Src/stm32f411xx_gpio_driver.c:11:6:GPIOx_PeriphClkControl	16	static
-../Drivers/Src/stm32f411xx_gpio_driver.c:44:6:GPIOx_init	24	static
-../Drivers/Src/stm32f411xx_gpio_driver.c:79:6:GPIOx_WriteOutput	16	static
-../Drivers/Src/stm32f411xx_gpio_driver.c:87:6:GPIOx_ToggleOutput	16	static
-../Drivers/Src/stm32f411xx_gpio_driver.c:91:9:GPIOx_ReadInputPin	16	static
-../Drivers/Src/stm32f411xx_gpio_driver.c:99:10:GPIOx_ReadInputPort	16	static

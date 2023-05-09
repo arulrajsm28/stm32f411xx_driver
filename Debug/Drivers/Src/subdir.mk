@@ -5,12 +5,15 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Drivers/Src/stm32f411xx.c \
 ../Drivers/Src/stm32f411xx_gpio_driver.c 
 
 OBJS += \
+./Drivers/Src/stm32f411xx.o \
 ./Drivers/Src/stm32f411xx_gpio_driver.o 
 
 C_DEPS += \
+./Drivers/Src/stm32f411xx.d \
 ./Drivers/Src/stm32f411xx_gpio_driver.d 
 
 
@@ -21,7 +24,7 @@ Drivers/Src/%.o Drivers/Src/%.su Drivers/Src/%.cyclo: ../Drivers/Src/%.c Drivers
 clean: clean-Drivers-2f-Src
 
 clean-Drivers-2f-Src:
-	-$(RM) ./Drivers/Src/stm32f411xx_gpio_driver.cyclo ./Drivers/Src/stm32f411xx_gpio_driver.d ./Drivers/Src/stm32f411xx_gpio_driver.o ./Drivers/Src/stm32f411xx_gpio_driver.su
+	-$(RM) ./Drivers/Src/stm32f411xx.cyclo ./Drivers/Src/stm32f411xx.d ./Drivers/Src/stm32f411xx.o ./Drivers/Src/stm32f411xx.su ./Drivers/Src/stm32f411xx_gpio_driver.cyclo ./Drivers/Src/stm32f411xx_gpio_driver.d ./Drivers/Src/stm32f411xx_gpio_driver.o ./Drivers/Src/stm32f411xx_gpio_driver.su
 
 .PHONY: clean-Drivers-2f-Src
 

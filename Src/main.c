@@ -22,7 +22,7 @@
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-#include "stm32411xx.h"
+#include <stm32f411xx.h>
 
 #define USER_BUTTON_HIGH LOW
 #define USER_BUTTON_LOW  HIGH
@@ -31,7 +31,7 @@ void driveLedWithButton(void);
 
 int main(void)
 {
-	driveLedWithButton();
+//	driveLedWithButton();
 
 	return 0;
 }

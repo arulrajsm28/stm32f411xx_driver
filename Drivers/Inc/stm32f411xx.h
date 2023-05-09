@@ -5,8 +5,8 @@
  *      Author: arul
  */
 
-#ifndef INC_STM32411XX_H_
-#define INC_STM32411XX_H_
+#ifndef INC_STM32F411XX_H_
+#define INC_STM32F411XX_H_
 
 #include <stdint.h>
 
@@ -27,6 +27,7 @@
 #define AHB2PERIPH_BASEADDR (PERIPH_BASEADDR + 0x10000000)
 
 #define RCC_BASEADDR (AHB1PERIPH_BASEADDR + 0x3800)
+#define HSI_CLK_FREQ 16000000UL
 
 typedef struct {
 	volatile uint32_t CR;
@@ -62,6 +63,10 @@ typedef struct {
 
 #define RCC ((RCC_RegDef_t *) RCC_BASEADDR)
 
-#include <stm32f411xx_gpio_driver.h>
 
-#endif /* INC_STM32411XX_H_ */
+uint32_t GetSystemClockValue(void);
+
+#include "stm32f411xx_gpio_driver.h"
+#include "stm32f411xx_spi_driver.h"
+
+#endif /* INC_STM32F411XX_H_ */
