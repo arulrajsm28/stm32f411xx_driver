@@ -23,19 +23,98 @@
 #endif
 
 #include <stm32f411xx.h>
+#include <string.h>
+
+#define MESSAGE "Test message"
 
 #define USER_BUTTON_HIGH LOW
 #define USER_BUTTON_LOW  HIGH
 
-void driveLedWithButton(void);
+void SPI1_TestSend(void);
+
+void delay() {
+	for(uint32_t i = 0; i < 500000/2; i++);
+}
 
 int main(void)
 {
-//	driveLedWithButton();
+
+	SPI1_TestSend();
 
 	return 0;
 }
 
+void SPI1_GPIOInit() {
+	GPIO_Config_t spiPinConfig = {
+			.PinNumber = GPIO_PIN_5,
+			.InputMode = GPIO_MODE_ALTFN,
+			.PUPD = GPIO_NO_PUPD,
+			.AltFun = 5,
+			.OutputType = GPIO_OP_PUPD,
+			.Speed = GPIO_SPEED_FAST,
+			.pGPIOx = GPIOA
+	};
+	// SPI SCLK pin settings
+	GPIOx_init(&spiPinConfig);
+
+	// SPI MOSI pin settings
+	spiPinConfig.PinNumber = GPIO_PIN_7;
+	GPIOx_init(&spiPinConfig);
+
+	// SPI MISO pin settings
+	spiPinConfig.PinNumber = GPIO_PIN_6;
+	GPIOx_init(&spiPinConfig);
+
+	// SPI SSEL pin settings
+	spiPinConfig.PinNumber = GPIO_PIN_4;
+	GPIOx_init(&spiPinConfig);
+}
+
+void SPI1_TestSend() {
+	GPIO_Config_t button = {
+			.PinNumber = GPIO_PIN_13,
+			.InputMode = GPIO_MODE_INPUT,
+			.PUPD = GPIO_NO_PUPD,
+			.pGPIOx = GPIOC
+	};
+
+	GPIOx_init(&button);
+	SPI1_GPIOInit();
+
+	SPI_Config_t spi1 = {
+			.baudRate = SPI_BAUD_RATE_8,
+			.clkPhase = SPI_CPHA_FIRST,
+			.clkPolarity = SPI_IDLE_CPOL_LOW,
+			.frameSize = SPI_FRAME_SIZE_8,
+			.mode = SPI_MODE_MASTER,
+			.txnBitPos = SPI_MSB_FIRST,
+			.ssm = SPI_SSM_DIS,
+			.txnMode = SPI_FULL_DUPLEX,
+			.pSPIx = SPI1
+	};
+
+	SPIx_Init(&spi1);
+	SPIx_SSOEConfig(spi1.pSPIx, ENABLE);
+
+	while(1) {
+		while (GPIOx_ReadInputPin(button.pGPIOx, GPIO_PIN_13) == USER_BUTTON_LOW);
+		// enable SPI peripheral
+		SPIx_PeriphControl(spi1.pSPIx, ENABLE);
+		delay();
+
+		uint8_t dataLen = strlen(MESSAGE);
+		SPIx_SendData(spi1.pSPIx, &dataLen, 1);
+
+		SPIx_SendData(spi1.pSPIx, (uint8_t *) MESSAGE, strlen(MESSAGE));
+
+		// confirm SPI is not busy
+		while (SPIx_GetFlagStatus(spi1.pSPIx, SPI_SR_BSY));
+		// disable SPI peripheral
+		SPIx_PeriphControl(spi1.pSPIx, DISABLE);
+	}
+}
+
+/*
 void driveLedWithButton(void) {
 	GPIO_Config_t button = {
 			.PinNumber = GPIO_PIN_13,
@@ -65,6 +144,6 @@ void driveLedWithButton(void) {
 		}
 	}
 }
-
+*/
 
 

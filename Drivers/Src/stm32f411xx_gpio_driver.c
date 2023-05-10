@@ -78,7 +78,7 @@ void GPIOx_init(GPIO_Config_t *pGpioConfig) {
 void GPIOx_WriteOutput(GPIO_RegDef_t *pGPIOx, uint8_t pinNumber, uint8_t value) {
 	if (value == SET) {
 		pGPIOx->ODR |= (1 << pinNumber);
-	} else if (value == UNSET) {
+	} else if (value == RESET) {
 		pGPIOx->ODR &= ~(1 << pinNumber);
 	}
 }
@@ -92,7 +92,7 @@ uint8_t GPIOx_ReadInputPin(GPIO_RegDef_t *pGPIOx, uint8_t pinNumber) {
 		return SET;
 	}
 
-	return UNSET;
+	return RESET;
 }
 
 uint16_t GPIOx_ReadInputPort(GPIO_RegDef_t *pGPIOx) {

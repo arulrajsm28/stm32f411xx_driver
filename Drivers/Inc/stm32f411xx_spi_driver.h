@@ -18,6 +18,7 @@
 
 typedef struct {
 	volatile uint32_t CR1;
+	volatile uint32_t CR2;
 	volatile uint32_t SR;
 	volatile uint32_t DR;
 	volatile uint32_t CRCPR;
@@ -37,9 +38,19 @@ typedef struct {
 #define SPI_CR1_CPOL  	 1
 #define SPI_CR1_MSTR  	 2
 #define SPI_CR1_BR   	 3
+#define SPI_CR1_SPE      6
 #define SPI_CR1_LSBFIRST 7
 #define SPI_CR1_SSM  	 9
 #define SPI_CR1_DFF 	 11
+#define SPI_CR1_RXONLY	 10
+#define SPI_CR1_BIDIOE   14
+#define SPI_CR1_BIDIMODE 15
+
+#define SPI_CR2_SSOE 2
+
+#define SPI_SR_RXNE  0
+#define SPI_SR_TXE   1
+#define SPI_SR_BSY   7
 
 #define SPI_FRAME_SIZE_8  0
 #define SPI_FRAME_SIZE_16 1
@@ -49,9 +60,6 @@ typedef struct {
 
 #define SPI_MSB_FIRST 0
 #define SPI_LSB_FIRST 1
-
-#define SPI_IDLE_CPOL_LOW  0
-#define SPI_IDLE_CPOL_HIGH 1
 
 #define SPI_IDLE_CPOL_LOW  0
 #define SPI_IDLE_CPOL_HIGH 1
@@ -71,6 +79,10 @@ typedef struct {
 #define SPI_MODE_SLAVE  0
 #define SPI_MODE_MASTER 1
 
+#define SPI_FULL_DUPLEX 	0
+#define SPI_HALF_DUPLEX 	1
+#define SPI_SIMPLEX_RX_ONLY 2
+
 typedef struct {
 	uint8_t mode;
 	uint8_t frameSize;
@@ -79,6 +91,7 @@ typedef struct {
 	uint8_t baudRate;
 	uint8_t clkPolarity;
 	uint8_t clkPhase;
+	uint8_t txnMode;
 	SPI_RegDef_t *pSPIx;
 } SPI_Config_t;
 
@@ -103,6 +116,11 @@ typedef struct {
 
 
 void SPIx_PeriphClkControl(SPI_RegDef_t *pSPIx, uint8_t enOrDis);
+void SPIx_PeriphControl(SPI_RegDef_t *pSPIx, uint8_t enOrDis);
 void SPIx_Init(SPI_Config_t *pSPIConfig);
+void SPIx_DeInit(SPI_RegDef_t *pSPIx);
+void  SPIx_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t enOrDis);
+uint8_t SPIx_GetFlagStatus(SPI_RegDef_t *pSPIx, uint8_t flagPos);
+void SPIx_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuf, uint32_t len);
 
 #endif /* INC_STM32F411XX_SPI_DRIVER_H_ */

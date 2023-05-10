@@ -24,6 +24,7 @@ typedef struct {
 	volatile uint32_t IDR;
 	volatile uint32_t ODR;
 	volatile uint32_t BSRR;
+	volatile uint32_t LCKR;
 	volatile uint32_t AFR[2];
 } GPIO_RegDef_t;
 

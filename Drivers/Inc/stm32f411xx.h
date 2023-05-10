@@ -16,7 +16,7 @@
 #define DISABLE LOW
 #define ENABLE  HIGH
 
-#define UNSET LOW
+#define RESET LOW
 #define SET   HIGH
 
 #define PERIPH_BASEADDR 0x40000000

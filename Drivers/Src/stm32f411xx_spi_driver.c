@@ -33,14 +33,47 @@ void SPIx_PeriphClkControl(SPI_RegDef_t *pSPIx, uint8_t enOrDis) {
 	}
 }
 
+/**
+ * Enable or disable SPI peripheral
+ */
+void SPIx_PeriphControl(SPI_RegDef_t *pSPIx, uint8_t enOrDis) {
+	if (enOrDis == ENABLE) {
+		pSPIx->CR1 |= (1 << SPI_CR1_SPE);
+	} else {
+		pSPIx->CR1 &= ~(1 << SPI_CR1_SPE);
+	}
+}
+
+/**
+ * SPI initialization
+ */
 void SPIx_Init(SPI_Config_t *pSPIConfig) {
+	SPIx_PeriphClkControl(pSPIConfig->pSPIx, ENABLE);
+
 	uint32_t tempReg = 0;
+	// device mode selection (master
+	tempReg |= (pSPIConfig->mode & 1) << SPI_CR1_MSTR;
+	// Data frame size selection
 	tempReg |= (pSPIConfig->frameSize & 1) << SPI_CR1_DFF;
+	// Clock Phase selection
 	tempReg |= (pSPIConfig->clkPhase & 1) << SPI_CR1_CPHA;
+	// Clock polarity selection
 	tempReg |= (pSPIConfig->clkPolarity & 1) << SPI_CR1_CPOL;
+	// Baud rate selection
 	tempReg |= (pSPIConfig->baudRate & 7) << SPI_CR1_BR;
+	// software slave select management selection
 	tempReg |= (pSPIConfig->ssm & 1) << SPI_CR1_SSM;
-	tempReg |= (pSPIConfig->txnBitPos &1) << SPI_CR1_LSBFIRST;
+	// LSBFIRST or MSBFIRST bit selection
+	tempReg |= (pSPIConfig->txnBitPos & 1) << SPI_CR1_LSBFIRST;
+
+	if (pSPIConfig->txnMode == SPI_FULL_DUPLEX) {
+		tempReg &= ~((1 << SPI_CR1_BIDIMODE) |  (1 << SPI_CR1_RXONLY));
+	} else if (pSPIConfig->txnMode == SPI_HALF_DUPLEX) {
+		tempReg |= 1 << SPI_CR1_BIDIMODE;
+	} else if (pSPIConfig->txnMode == SPI_SIMPLEX_RX_ONLY) {
+		tempReg &= ~(1 << SPI_CR1_BIDIMODE);
+		tempReg |= 1 << SPI_CR1_RXONLY;
+	}
 
 	pSPIConfig->pSPIx->CR1 |= tempReg;
 }
@@ -61,13 +94,45 @@ void SPIx_DeInit(SPI_RegDef_t *pSPIx) {
 		SPI5_REG_RESET();
 	}
 }
-/**
- * setting device mode
- * mode = MASTER|SLAVE
- */
-void SPIx_SetDeviceMode(SPI_RegDef_t *pSPIx, uint8_t mode) {
-	pSPIx->CR1 |= (mode & 1) << SPI_CR1_MSTR;
+
+void  SPIx_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t enOrDis)
+{
+	if (enOrDis == ENABLE) {
+		pSPIx->CR2 |=  (1 << SPI_CR2_SSOE);
+	} else {
+		pSPIx->CR2 &=  ~(1 << SPI_CR2_SSOE);
+	}
 }
+
+uint8_t SPIx_GetFlagStatus(SPI_RegDef_t *pSPIx, uint8_t flagPos) {
+	if (pSPIx->SR & (1 << flagPos)) {
+		return SET;
+	}
+
+	return RESET;
+}
+
+void SPIx_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuf, uint32_t len) {
+	while (len) {
+		while(SPIx_GetFlagStatus(pSPIx, SPI_SR_TXE) == RESET);
+
+		if (pSPIx->CR1 & (1 << SPI_CR1_DFF)) {
+			pSPIx->DR = *((uint16_t *)pTxBuf);
+			len--;
+			len--;
+			(uint16_t*)pTxBuf++;
+		} else {
+			pSPIx->DR = *pTxBuf++;
+			len--;
+		}
+	}
+}
+
+void SPIx_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuf, uint32_t len) {
+
+}
+
+
 
 
 
