@@ -27,7 +27,26 @@
 #define AHB2PERIPH_BASEADDR (PERIPH_BASEADDR + 0x10000000)
 
 #define RCC_BASEADDR (AHB1PERIPH_BASEADDR + 0x3800)
+
+#define APB_LOW_SPEED  1
+#define APB_HIGH_SPEED 2
+
 #define HSI_CLK_FREQ 16000000UL
+
+#define RCC_CFGR_SWS 2
+#define RCC_CFGR_HPRE 4
+#define RCC_CFGR_PPRE1 10
+#define RCC_CFGR_PPRE2 13
+
+#define RCC_PLLCFGR_PLLM 0
+#define RCC_PLLCFGR_PLLN 6
+#define RCC_PLLCFGR_PLLP 16
+#define RCC_PLLCFGR_PLLSRC 22
+
+#define SYSCLK_HSI 0
+#define SYSCLK_HSE 2
+#define SYSCLK_PLL 3
+
 
 typedef struct {
 	volatile uint32_t CR;
@@ -64,7 +83,9 @@ typedef struct {
 #define RCC ((RCC_RegDef_t *) RCC_BASEADDR)
 
 
-uint32_t GetSystemClockValue(void);
+uint32_t getSystemClockFreq(uint8_t recalculate);
+uint32_t getAHB1ClockFreq(uint8_t recalculate);
+uint32_t getAPBClockFreq(uint8_t periperal, uint8_t recalculate);
 
 #include "stm32f411xx_gpio_driver.h"
 #include "stm32f411xx_spi_driver.h"

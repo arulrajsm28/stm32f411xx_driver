@@ -1,55 +1,73 @@
 
 #include "stm32f411xx.h"
 
-uint16_t AHBPrescaler[] = {2, 4, 8, 16, 32, 64, 128, 256, 512};
-uint8_t APBPrescalar[] = {2, 4, 8, 16};
+uint32_t SysClkFreq = 0;
+uint32_t AHB1ClkFreq = 0;
 
-uint32_t GetSysClk(void) {
-	RCC_RegDef_t *pRCC = RCC;
-	uint32_t sysClk = 0;
-	uint8_t clockSource = (pRCC->CFGR >> 2) & 0x3;
-	if (clockSource == 0) {
-		sysClk = HSI_CLK_FREQ;
-	} else if (clockSource == 2) {
-		sysClk = 8000000;
-	} else {
-		sysClk = (HSI_CLK_FREQ * ((pRCC->PLLCFGR >> 6) & 0x1FF)) / (((pRCC->PLLCFGR >> 16) & 0x3) * (pRCC->PLLCFGR & 0x3F));
+uint16_t AHB_Prescalar[8] = {2, 4, 8, 16, 64, 128, 256, 512};
+uint8_t APB_Prescalar[4] = {2, 4, 8, 16};
+
+uint32_t getSystemClockFreq(uint8_t recalculate) {
+	if (SysClkFreq > 0 && recalculate == 0) {
+		return SysClkFreq;
 	}
 
-	return sysClk;
-}
-
-
-uint32_t GetAPB1Clk(void) {
 	RCC_RegDef_t *pRCC = RCC;
-	uint32_t sysClk = GetSysClk(), clkVal = 0;
+	uint8_t clkSrc = (pRCC->CFGR >> RCC_CFGR_SWS) & 0x3;
 
-	// AHB prescaler calculation
-	uint8_t prescalerTemp = ((pRCC->CFGR >> 4) & 0xF) - 8;
-	clkVal = sysClk / AHBPrescaler[prescalerTemp];
+	if (clkSrc == SYSCLK_HSI) {
+		SysClkFreq = HSI_CLK_FREQ;
+	} else if (clkSrc == SYSCLK_HSE) {
+		SysClkFreq = 8000000UL;
+	} else if (clkSrc == SYSCLK_PLL) {
+		uint32_t pllsrcFreq;
+		if (pRCC->PLLCFGR & (1 << RCC_PLLCFGR_PLLSRC)) {
+			pllsrcFreq = 8000000UL;
+		} else {
+			pllsrcFreq = HSI_CLK_FREQ;
+		}
 
-	// APB prescaler calculation
-	prescalerTemp = ((pRCC->CFGR >> 10) & 0x7) - 4;
-	clkVal /= prescalerTemp;
+		SysClkFreq = (pllsrcFreq * ((pRCC->PLLCFGR >> RCC_PLLCFGR_PLLN) & 0x1FF)) / ((pRCC->PLLCFGR & 0x3F) * ((pRCC->PLLCFGR >> RCC_PLLCFGR_PLLP) & 0x3));
+	}
 
-	return clkVal;
+	return SysClkFreq;
 }
 
+uint32_t getAHB1ClockFreq(uint8_t recalculate) {
+	if (AHB1ClkFreq > 0 && recalculate == 0) {
+		return AHB1ClkFreq;
+	}
 
-
-uint32_t GetAPB2Clk(void) {
 	RCC_RegDef_t *pRCC = RCC;
-	uint32_t sysClk = GetSysClk(), clkVal = 0;
+	uint16_t prescalar = ((pRCC->CFGR >> RCC_CFGR_HPRE) & 0xF);
+	// system clock not divided if pre scalar value is less than 8
+	if (prescalar < 8) {
+		prescalar = 1;
+	} else {
+		prescalar  = AHB_Prescalar[prescalar - 8];
+	}
 
-	// AHB pre scaler calculation
-	uint8_t prescalerTemp = ((pRCC->CFGR >> 4) & 0xF) - 8;
-	clkVal = sysClk / AHBPrescaler[prescalerTemp];
+	AHB1ClkFreq = getSystemClockFreq(recalculate) / prescalar;
 
-	// APB pre scaler calculation
-	prescalerTemp = ((pRCC->CFGR >> 13) & 0x7) - 4;
-	clkVal /= prescalerTemp;
-
-	return clkVal;
+	return AHB1ClkFreq;
 }
 
+uint32_t getAPBClockFreq(uint8_t periperal, uint8_t recalculate) {
+	RCC_RegDef_t *pRCC = RCC;
+	uint8_t prescalar;
 
+	if (periperal == APB_LOW_SPEED) {
+		prescalar = ((pRCC->CFGR >> RCC_CFGR_PPRE1) & 0x7);
+	} else {
+		prescalar = ((pRCC->CFGR >> RCC_CFGR_PPRE2) & 0x7);
+	}
+
+	// AHB clock not divided if pre scalar value is less than 8
+	if (prescalar < 4) {
+		prescalar = 1;
+	} else {
+		prescalar  = APB_Prescalar[prescalar - 4];
+	}
+
+	return getAHB1ClockFreq(recalculate) / prescalar;
+}
