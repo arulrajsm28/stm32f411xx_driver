@@ -48,11 +48,31 @@ typedef struct {
 
 #define I2C_OAR1_ADDR_7 1
 
+#define I2C_CCR_DUTY 14
+#define I2C_CCR_FS   15
+
 #define I2C_MODE_SLAVE			0
 #define I2C_MODE_MASTER_SM      1
 #define I2C_MODE_MASTER_FM_2    2
 #define I2C_MODE_MASTER_FM_16_9 3
 
+#define I2C1_PERIPH_EN() (RCC->APB1ENR |= (1 << 21))
+#define I2C2_PERIPH_EN() (RCC->APB1ENR |= (1 << 22))
+#define I2C3_PERIPH_EN() (RCC->APB1ENR |= (1 << 23))
+
+#define I2C1_PERIPH_DIS() (RCC->APB1ENR &= ~(1 << 21))
+#define I2C2_PERIPH_DIS() (RCC->APB1ENR &= ~(1 << 22))
+#define I2C3_PERIPH_DIS() (RCC->APB1ENR &= ~(1 << 23))
+
+#define I2C1_PERIPH_RESET() do{(RCC->APB1RSTR |= (1 << 21)); (RCC->APB1RSTR &= ~(1 << 21));}while(0)
+#define I2C2_PERIPH_RESET() do{(RCC->APB1RSTR |= (1 << 22)); (RCC->APB1RSTR &= ~(1 << 22));}while(0)
+#define I2C3_PERIPH_RESET() do{(RCC->APB1RSTR |= (1 << 23)); (RCC->APB1RSTR &= ~(1 << 23));}while(0)
+
+void I2Cx_PeriphClkControl(I2C_RegDef_t *pI2Cx, uint8_t enOrDis);
+void I2Cx_PeriphControl(I2C_RegDef_t *pI2Cx, uint8_t enOrDis);
 void I2Cx_Init(I2C_Config_t *pI2CxConfig);
+void I2Cx_DeInit(I2C_RegDef_t *pI2Cx);
+void I2Cx_GenerateStart(I2C_RegDef_t *pI2Cx);
+uint8_t I2Cx_GetFlagStatus(uint32_t *pI2CxReg, uint8_t flag);
 
 #endif /* INC_STM32F411XX_I2C_DRIVER_H_ */
